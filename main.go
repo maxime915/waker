@@ -53,8 +53,14 @@ func Wake(macAddr []byte) error {
 
 func getHandler(msgAddr []byte) func(w http.ResponseWriter, _ *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		Wake(msgAddr)
-		fmt.Fprintf(w, "magic packet send\n")
+		err := Wake(msgAddr)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "500 - Error while sending magic packet: %s\n", err.Error())
+		} else {
+			w.WriteHeader(http.StatusOK);
+			fmt.Fprintf(w, "200 - Magic packet send\n")
+		}
 	}
 }
 
@@ -63,6 +69,10 @@ func main() {
 	msgAddr, err := ioutil.ReadFile("config.addr")
 	if err != nil {
 		log.Fatal("unable to open the config file");
+	}
+
+	if len(msgAddr) != 6 {
+		log.Fatalf("invalid MAC address, expected 6 byte, found: %X\n", msgAddr)
 	}
 
 	addr := "192.168.0.15:9009"
