@@ -65,18 +65,23 @@ func getHandler(msgAddr []byte) func(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+	addr := "192.168.0.15:9009"
+	if len(os.Args) > 1 {
+		addr = os.Args[1]
+	}
+
+	config := "config.addr"
+	if len(os.Args) > 2 {
+		config = os.Args[2]
+	}
+
 	// get mac address from config file
-	msgAddr, err := ioutil.ReadFile("config.addr")
+	msgAddr, err := ioutil.ReadFile(config)
 	if err != nil {
 		log.Fatal("unable to open the config file");
 	}
 	if len(msgAddr) != 6 {
 		log.Fatalf("invalid MAC address, expected 6 byte, found: %X\n", msgAddr)
-	}
-
-	addr := "192.168.0.15:9009"
-	if len(os.Args) > 1 {
-		addr = os.Args[1]
 	}
 
 	http.HandleFunc("/wake", getHandler(msgAddr))
