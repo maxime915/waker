@@ -70,7 +70,6 @@ func main() {
 	if err != nil {
 		log.Fatal("unable to open the config file");
 	}
-
 	if len(msgAddr) != 6 {
 		log.Fatalf("invalid MAC address, expected 6 byte, found: %X\n", msgAddr)
 	}
