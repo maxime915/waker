@@ -1,3 +1,10 @@
+# product
+waker
+piwaker
+
+# config
+config.addr
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
