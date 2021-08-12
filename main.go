@@ -44,7 +44,7 @@ func Wake(macAddr net.HardwareAddr) error {
 		return err
 	}
 	if count != len(msg) {
-		return fmt.Errorf("expected to write %d more bytes", len(msg)-count)
+		return fmt.Errorf("unable to write WOL packet (delta=%d)", len(msg)-count)
 	}
 
 	return nil
