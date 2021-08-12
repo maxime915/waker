@@ -1,17 +1,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"os"
 )
 
 const broadcast = "192.168.0.255:9"
 
-func Wake(macAddr []byte) error {
+func Wake(macAddr net.HardwareAddr) error {
 	addr, err := net.ResolveUDPAddr("udp", broadcast)
 	if err != nil {
 		return err
@@ -51,7 +50,7 @@ func Wake(macAddr []byte) error {
 	return nil
 }
 
-func getHandler(msgAddr []byte) func(w http.ResponseWriter, _ *http.Request) {
+func getHandler(msgAddr net.HardwareAddr) func(w http.ResponseWriter, _ *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		err := Wake(msgAddr)
 		if err != nil {
@@ -65,25 +64,33 @@ func getHandler(msgAddr []byte) func(w http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-	addr := "192.168.0.15:9009"
-	if len(os.Args) > 1 {
-		addr = os.Args[1]
+	var targetStr, addr string
+	var verbose bool
+
+	flag.StringVar(&targetStr, "target", "", "MAC address of the target")
+	flag.StringVar(&addr, "address", "127.0.0.1:0", "server binding address and port")
+	flag.BoolVar(&verbose, "verbose", false, "print a confirmation message before serving")
+	flag.Parse()
+
+	// check target
+	if len(targetStr) == 0 {
+		log.Fatal("the MAC address of the target is required")
 	}
 
-	config := "config.addr"
-	if len(os.Args) > 2 {
-		config = os.Args[2]
-	}
-
-	// get mac address from config file
-	msgAddr, err := ioutil.ReadFile(config)
+	target, err := net.ParseMAC(targetStr)
 	if err != nil {
-		log.Fatal("unable to open the config file")
-	}
-	if len(msgAddr) != 6 {
-		log.Fatalf("invalid MAC address, expected 6 byte, found: %X\n", msgAddr)
+		log.Fatal("could not parse target: ", err)
 	}
 
-	http.HandleFunc("/wake", getHandler(msgAddr))
-	log.Fatal(http.ListenAndServe(addr, nil))
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if verbose {
+		fmt.Println("waker is listening on", listener.Addr().String(), "for target", target.String())
+	}
+
+	http.HandleFunc("/wake", getHandler(target))
+	log.Fatal(http.Serve(listener, nil))
 }
