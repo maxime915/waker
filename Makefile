@@ -4,9 +4,17 @@ waker:		main.go
 piwaker:	main.go
 	env GOOS=linux GOARCH=arm GOARM=5 go build -o $@
 
-.PHONY:
-all:	waker | piwaker
+.PHONY: vet
+vet:	main.go waker_test.go
+	go vet ./...
 
-.PHONY:
+.PHONY: test
+test:	main.go waker_test.go
+	go test ./...
+
+.PHONY: all
+all:	waker piwaker
+
+.PHONY: clean
 clean:
-	rm waker piwaker
+	rm -f waker piwaker
