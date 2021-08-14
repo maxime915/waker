@@ -76,6 +76,7 @@ func main() {
 	addr := flag.String("address", ":0", "server binding address (with port)")
 	broadcast := flag.String("broadcast", "192.168.0.255:9", "UDP address to send the datagram to (with port)")
 	verbose := flag.Bool("verbose", false, "gives more network information at start-up")
+	killable := flag.Bool("killable", true, "allow the route /kill to work")
 
 	flag.Parse()
 
@@ -90,7 +91,7 @@ func main() {
 	defer dest.Close()
 
 	if *verbose {
-		fmt.Println("waker is running")
+		fmt.Println("waker is running, killable:", *killable)
 		fmt.Println("\tTCP socket", listener.Addr().String())
 		fmt.Println("\tMAC target", targetAddr.String())
 		fmt.Println("\tUDP target", dest.RemoteAddr().String())
@@ -117,7 +118,20 @@ func main() {
 
 	done := make(chan struct{})
 	mux.HandleFunc("/kill", func(w http.ResponseWriter, _ *http.Request) {
-		close(done)
+		if *killable {
+			w.WriteHeader(http.StatusOK)
+			_, err := fmt.Fprintln(w, "200 - shutting down")
+			if err != nil {
+				log.Println(err)
+			}
+			close(done)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+			_, err := fmt.Fprintln(w, "400 - server cannot be killed remotely")
+			if err != nil {
+				log.Println(err)
+			}
+		}
 	})
 
 	go func() {
