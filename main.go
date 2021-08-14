@@ -73,9 +73,9 @@ func ParseArguments(target, addr, broadcast string) (net.Listener, net.HardwareA
 
 func main() {
 	target := flag.String("target", "", "6 bytes MAC address of the target")
-	addr := flag.String("address", "", "server binding address (with port)")
+	addr := flag.String("address", ":0", "server binding address (with port)")
 	broadcast := flag.String("broadcast", "192.168.0.255:9", "UDP address to send the datagram to (with port)")
-	verbose := flag.Bool("verbose", false, "print a confirmation message before serving")
+	verbose := flag.Bool("verbose", false, "gives more network information at start-up")
 
 	flag.Parse()
 
@@ -108,7 +108,7 @@ func main() {
 			}
 		} else {
 			w.WriteHeader(http.StatusOK)
-			_, err := fmt.Fprintln(w, "200 - Magic packet send")
+			_, err := fmt.Fprintln(w, "200 - Magic packet sent")
 			if err != nil {
 				log.Println(err)
 			}
