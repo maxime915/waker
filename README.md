@@ -2,6 +2,8 @@
 
 HTTP interface to send WakeOnLan magic packet remotely
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/maxime915/waker.svg)](https://pkg.go.dev/github.com/maxime915/waker)
+
 ## High level view
 
 The goal of this micro service is to remotely wake a computer from a phone or a laptop.
