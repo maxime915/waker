@@ -8,6 +8,7 @@ import (
 	send_wol "github.com/maxime915/waker/cmd/send-wol"
 	serve_http "github.com/maxime915/waker/cmd/serve-http"
 
+	serve_telegram "github.com/maxime915/waker/cmd/serve-telegram"
 	"github.com/voxelbrain/goptions"
 )
 
@@ -20,9 +21,10 @@ func main() {
 
 		goptions.Verbs
 
-		ServeHTTP serve_http.VerbArguments  `goptions:"serve-http"`
-		SendWOL   send_wol.VerbArguments    `goptions:"send-wol"`
-		GetHTTP   remote_http.VerbArguments `goptions:"remote-http"`
+		ServeHTTP     serve_http.VerbArguments     `goptions:"serve-http"`
+		SendWOL       send_wol.VerbArguments       `goptions:"send-wol"`
+		GetHTTP       remote_http.VerbArguments    `goptions:"remote-http"`
+		ServeTelegram serve_telegram.VerbArguments `goptions:"serve-telegram"`
 	}{
 		// Default values
 		ServeHTTP: serve_http.VerbArguments{
@@ -30,6 +32,9 @@ func main() {
 			Broadcast:      defaultBroadcast,
 		},
 		SendWOL: send_wol.VerbArguments{
+			Broadcast: defaultBroadcast,
+		},
+		ServeTelegram: serve_telegram.VerbArguments{
 			Broadcast: defaultBroadcast,
 		},
 	}
@@ -47,6 +52,8 @@ func main() {
 		options.SendWOL.Execute()
 	case "remote-http":
 		options.GetHTTP.Execute()
+	case "serve-telegram":
+		options.ServeTelegram.Execute()
 	default:
 		fmt.Fprintln(os.Stderr, "A verb is required.")
 		goptions.PrintHelp()
