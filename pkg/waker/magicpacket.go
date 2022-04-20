@@ -58,7 +58,7 @@ func SendPacketTo(target, broadcast string) error {
 	// create packet
 	packet, err := NewMagicPacket(target)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	// UDP destination (broadcast)
