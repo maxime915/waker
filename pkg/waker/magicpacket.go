@@ -50,17 +50,8 @@ func NewMagicPacket(address string) (WOLPacket, error) {
 	return NewMagicPacketWithPassword(address, nil)
 }
 
-func SendPacketTo(target, broadcast string) error {
-	if len(target) == 0 {
-		return fmt.Errorf("the MAC address of the target is required")
-	}
-
-	// create packet
-	packet, err := NewMagicPacket(target)
-	if err != nil {
-		return err
-	}
-
+// SendTo sends the magic packet to the given broadcast address
+func (packet WOLPacket) SendTo(broadcast string) error {
 	// UDP destination (broadcast)
 	dest, err := net.Dial("udp", broadcast)
 	if err != nil {
@@ -72,4 +63,24 @@ func SendPacketTo(target, broadcast string) error {
 	_, err = dest.Write(packet.body)
 
 	return err
+}
+
+func (packet WOLPacket) String() string {
+	return fmt.Sprintf("Magic Packet targetting %v", packet.address)
+}
+
+// SendPacketTo creates a magic packet for the given target and sends its to
+// the given broadcast address
+func SendPacketTo(target, broadcast string) error {
+	if len(target) == 0 {
+		return fmt.Errorf("the MAC address of the target is required")
+	}
+
+	// create packet
+	packet, err := NewMagicPacket(target)
+	if err != nil {
+		return err
+	}
+
+	return packet.SendTo(broadcast)
 }
