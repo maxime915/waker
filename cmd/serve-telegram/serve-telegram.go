@@ -27,6 +27,11 @@ func (va VerbArguments) Execute() {
 
 	flag.Parse()
 
+	packet, err := waker.NewMagicPacket(va.Target)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	bot, err := telegram.NewBot(telegram.Settings{
 		Token:  va.Token,
 		Poller: &telegram.LongPoller{Timeout: 30 * time.Second},
@@ -37,7 +42,7 @@ func (va VerbArguments) Execute() {
 
 	if va.Verbose {
 		fmt.Println("waker is running, killable:", va.Killable)
-		fmt.Println("\ttarget", va.Target)
+		fmt.Println("\tpacket", packet)
 		fmt.Println("\tbroadcast", va.Broadcast)
 	}
 
@@ -57,7 +62,7 @@ func (va VerbArguments) Execute() {
 	})
 
 	bot.Handle("/wake", func(c telegram.Context) error {
-		err := waker.SendPacketTo(va.Target, va.Broadcast)
+		err := packet.SendTo(va.Broadcast)
 		if err != nil {
 			log.Println(err)
 			_, err = bot.Send(c.Sender(), "Error while sending magic packet (see logs)")
