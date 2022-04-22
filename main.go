@@ -101,7 +101,7 @@ func main() {
 	mux.HandleFunc("/wake", func(w http.ResponseWriter, _ *http.Request) {
 		_, err := dest.Write(payload)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, err := fmt.Fprintln(w, "500 - Error while sending magic packet (see logs)")
 			if err != nil {

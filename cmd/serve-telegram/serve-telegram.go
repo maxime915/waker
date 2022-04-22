@@ -59,7 +59,7 @@ func (va VerbArguments) Execute() {
 	bot.Handle("/wake", func(c telegram.Context) error {
 		err := waker.SendPacketTo(va.Target, va.Broadcast)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
 			_, err = bot.Send(c.Message().Sender, "Error while sending magic packet (see logs)")
 			if err != nil {
 				log.Println(err)
