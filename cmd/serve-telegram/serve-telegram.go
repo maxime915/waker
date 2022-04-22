@@ -52,7 +52,7 @@ func (va VerbArguments) Execute() {
 
 	bot.Handle("/info", func(c telegram.Context) error {
 		msg := fmt.Sprintf("Killable: %v\nTarget: %v\nBroadcast: %v\n", va.Killable, va.Target, va.Broadcast)
-		_, err := bot.Send(c.Message().Sender, msg)
+		_, err := bot.Send(c.Sender(), msg)
 		return err
 	})
 
@@ -60,12 +60,12 @@ func (va VerbArguments) Execute() {
 		err := waker.SendPacketTo(va.Target, va.Broadcast)
 		if err != nil {
 			log.Println(err)
-			_, err = bot.Send(c.Message().Sender, "Error while sending magic packet (see logs)")
+			_, err = bot.Send(c.Sender(), "Error while sending magic packet (see logs)")
 			if err != nil {
 				log.Println(err)
 			}
 		} else {
-			_, err = bot.Send(c.Message().Sender, "Magic packet sent")
+			_, err = bot.Send(c.Sender(), "Magic packet sent")
 			if err != nil {
 				log.Println(err)
 			}
@@ -76,13 +76,13 @@ func (va VerbArguments) Execute() {
 	done := make(chan struct{})
 	bot.Handle("/kill", func(c telegram.Context) error {
 		if va.Killable {
-			_, err = bot.Send(c.Message().Sender, "Shutting down")
+			_, err = bot.Send(c.Sender(), "Shutting down")
 			if err != nil {
 				log.Println(err)
 			}
 			close(done)
 		} else {
-			_, err = bot.Send(c.Message().Sender, "Server cannot be killed remotely")
+			_, err = bot.Send(c.Sender(), "Server cannot be killed remotely")
 			if err != nil {
 				log.Println(err)
 			}
@@ -92,7 +92,7 @@ func (va VerbArguments) Execute() {
 	})
 
 	bot.Handle(telegram.OnText, func(c telegram.Context) error {
-		_, err := bot.Send(c.Message().Sender, "Unrecognized command")
+		_, err := bot.Send(c.Sender(), "Unrecognized command")
 		return err
 	})
 
