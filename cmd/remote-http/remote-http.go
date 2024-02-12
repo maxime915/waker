@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 )
 
 type VerbArguments struct {
 	HostName string `goptions:"-n, --hostname, obligatory, description='Hostname or address (with port) of the HTTP server'"`
+	Target   string `goptions:"-t, --target, description='Target to wake. Will wake the default if not provided'"`
 }
 
 func (va VerbArguments) Execute() {
@@ -21,7 +23,15 @@ func (va VerbArguments) Execute() {
 		os.Exit(1)
 	}
 
-	response, err := http.Get("http://" + va.HostName + "/wake")
+	url := "http://" + va.HostName + "/wake"
+	if len(va.Target) > 0 {
+		if _, err := net.ParseMAC(va.Target); err != nil {
+			log.Fatal("invalid target: " + err.Error())
+		}
+		url += "/" + va.Target
+	}
+
+	response, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
