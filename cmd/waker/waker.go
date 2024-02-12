@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	remote_http "github.com/maxime915/waker/cmd/remote-http"
@@ -10,6 +11,7 @@ import (
 
 	serve_telegram "github.com/maxime915/waker/cmd/serve-telegram"
 	"github.com/voxelbrain/goptions"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const defaultBroadcast = "192.168.0.255:9"
@@ -18,6 +20,7 @@ func main() {
 	options := struct {
 		Version bool          `goptions:"-v, --version, description='Print version'"`
 		Help    goptions.Help `goptions:"-h, --help, description='Show this help'"`
+		LogFile string        `goptions:"--logfile, description='Rolling log files'"`
 
 		goptions.Verbs
 
@@ -39,6 +42,12 @@ func main() {
 		},
 	}
 	goptions.ParseAndFail(&options)
+
+	log.SetOutput(&lumberjack.Logger{
+		Filename:   options.LogFile,
+		MaxSize:    50,
+		MaxBackups: 3,
+	})
 
 	if options.Version {
 		fmt.Println("waker version 0.3")

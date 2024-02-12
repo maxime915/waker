@@ -23,6 +23,8 @@ type VerbArguments struct {
 
 func wakerFn(target, broadcast string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("host:", r.Host, "url:", r.URL.String(), "waking target:", target)
+
 		err := waker.SendPacketTo(target, broadcast)
 		if err != nil {
 			log.Println(err)
@@ -41,7 +43,8 @@ func wakerFn(target, broadcast string) func(http.ResponseWriter, *http.Request) 
 	}
 }
 
-func badRequest(w http.ResponseWriter, _ *http.Request) {
+func badRequest(w http.ResponseWriter, r *http.Request) {
+	log.Println("bad request", "host:", r.Host, "url:", r.URL.String())
 	w.WriteHeader(http.StatusBadRequest)
 	_, err := fmt.Fprintln(w, "400 - Default route unsupported : more than one target possible")
 	if err != nil {
@@ -98,7 +101,8 @@ func (va VerbArguments) Execute() {
 	}
 
 	done := make(chan struct{})
-	mux.HandleFunc("/kill", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/kill", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("kill-request", "host:", r.Host, "url:", r.URL.String(), "killable:", va.Killable)
 		if va.Killable {
 			w.WriteHeader(http.StatusOK)
 			_, err := fmt.Fprintln(w, "200 - shutting down")
@@ -112,6 +116,15 @@ func (va VerbArguments) Execute() {
 			if err != nil {
 				log.Println(err)
 			}
+		}
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("bad request", r.URL.String())
+		w.WriteHeader(http.StatusBadRequest)
+		_, err := fmt.Fprintln(w, "400 - bad request: this route is not implemented")
+		if err != nil {
+			log.Println(err.Error())
 		}
 	})
 
