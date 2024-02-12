@@ -4,7 +4,7 @@ package remote_http
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -37,7 +37,7 @@ func (va VerbArguments) Execute() {
 	}
 
 	defer response.Body.Close()
-	message, err := ioutil.ReadAll(response.Body)
+	message, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
