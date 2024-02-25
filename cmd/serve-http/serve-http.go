@@ -3,7 +3,6 @@
 package serve_http
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -53,8 +52,6 @@ func badRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va VerbArguments) Execute() {
-
-	flag.Parse()
 
 	var lastError error
 	targetLst := strings.Split(va.Target, ",")

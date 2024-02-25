@@ -3,7 +3,6 @@
 package serve_telegram
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -29,8 +28,6 @@ type VerbArguments struct {
 }
 
 func (va VerbArguments) Execute() {
-
-	flag.Parse()
 
 	if va.InMemory != (len(va.StorePath) == 0) {
 		log.Fatalf("exactly only one of --store-path='%v' , --in-memory='%v' must be set", va.StorePath, va.InMemory)
