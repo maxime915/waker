@@ -9,11 +9,38 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type VerbArguments struct {
 	HostName string `goptions:"-n, --hostname, obligatory, description='Hostname or address (with port) of the HTTP server'"`
 	Target   string `goptions:"-t, --target, description='Target to wake. Will wake the default if not provided'"`
+}
+
+func buildUrl(hostname, target string) (url string, err error) {
+	// check scheme and hostname
+	if strings.HasPrefix(hostname, "http://") || strings.HasPrefix(hostname, "https://") {
+		url = hostname
+	} else {
+		url = "http://" + hostname
+	}
+
+	// add first segment
+	url += "/wake"
+
+	// default route
+	if len(target) == 0 {
+		return url, nil
+	}
+
+	// check target
+	_, err = net.ParseMAC(target)
+	if err != nil {
+		return "", err
+	}
+
+	url += "/" + target
+	return url, nil
 }
 
 func (va VerbArguments) Execute() {
@@ -23,12 +50,9 @@ func (va VerbArguments) Execute() {
 		os.Exit(1)
 	}
 
-	url := "http://" + va.HostName + "/wake"
-	if len(va.Target) > 0 {
-		if _, err := net.ParseMAC(va.Target); err != nil {
-			log.Fatal("invalid target: " + err.Error())
-		}
-		url += "/" + va.Target
+	url, err := buildUrl(va.HostName, va.Target)
+	if err != nil {
+		log.Fatal("invalid target: " + err.Error())
 	}
 
 	response, err := http.Get(url)
